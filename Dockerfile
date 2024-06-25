@@ -1,29 +1,14 @@
-FROM python:3.10-slim
+FROM python:3.9-slim
 
-# Install system dependencies
 RUN apt-get update && apt-get install -y \
     build-essential \
-    wget \
-    curl \
-    libblas-dev \
-    liblapack-dev \
-    gfortran \
     && rm -rf /var/lib/apt/lists/*
 
-# Install pip and other Python dependencies
-RUN pip install --upgrade pip
+COPY requirements.txt .
 
-# Copy the requirements file into the container
-COPY requirements.txt /app/requirements.txt
+RUN pip install --upgrade pip \
+    && pip install -r requirements.txt
 
-# Install Python dependencies
-RUN pip install -r /app/requirements.txt
+COPY . .
 
-# Copy the application code into the container
-COPY . /app
-
-# Set the working directory
-WORKDIR /app
-
-# Command to run the application
-CMD ["streamlit", "run", "app.py"]
+CMD ["python", "your_script.py"]
