@@ -1,3 +1,4 @@
+import os
 import streamlit as st  # webUI
 from dotenv import load_dotenv #Private doc
 from PyPDF2 import PdfReader #python library to read PDF file 
@@ -8,7 +9,7 @@ from langchain.chat_models import ChatOpenAI # gpt-3.4-turbo
 from langchain.memory import ConversationBufferMemory # Store previous data 
 from langchain.chains import ConversationalRetrievalChain # extract the data from the knowledge base
 from htmlTemplates import css, bot_template, user_template # Web UI template
-from langchain.llms import HuggingFaceHub  # For hugging face LLM
+from langchain.llms import HuggingFaceHub , GooglePalm  # For hugging face LLM
 
 def get_pdf_text(pdf_docs):
     text = ""
@@ -31,15 +32,18 @@ def get_text_chunks(text):
 
 
 def get_vectorstore(text_chunks):
-    embeddings = OpenAIEmbeddings()
-    # embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    #embeddings = OpenAIEmbeddings()
+    #embeddings = HuggingFaceInstructEmbeddings(model_name="hkunlp/instructor-xl")
+    embeddings = HuggingFaceInstructEmbeddings(model_name='sentence-transformers/all-MiniLM-L6-v2')
     vectorstore = FAISS.from_texts(texts=text_chunks, embedding=embeddings)
     return vectorstore
 
 
 def get_conversation_chain(vectorstore):
-    llm = ChatOpenAI()
+    #llm = ChatOpenAI()
     # llm = HuggingFaceHub(repo_id="google/flan-t5-xxl", model_kwargs={"temperature":0.5, "max_length":512})
+    llm = GooglePalm(google_api_key=os.environ["GOOGLE_API_KEY"], temperature=0.1)
+
 
     memory = ConversationBufferMemory(
         memory_key='chat_history', return_messages=True)
